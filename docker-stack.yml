@@ -1,0 +1,28 @@
+version: "3.9"
+
+networks:
+  traefik-public:
+    external: true
+
+services:
+  cz-api:
+    image: cz-api
+    command: gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    networks:
+      - traefik-public
+    restart_policy:
+      condition: on-failure
+    deploy:
+      replicas: 2
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.cz-api.rule=Host(`cz-api.itv34.ru`) && (ClientIP(`192.168.57.0/24`) || ClientIP(`192.168.56.0/24`))"
+        - "traefik.http.routers.cz-api.entrypoints=http"
+        - "traefik.http.routers.cz-api.middlewares=https-redirect"
+        - "traefik.http.routers.cz-api-https.rule=Host(`cz-api.itv34.ru`)"
+        - "traefik.http.routers.cz-api-https.entrypoints=https"
+        - "traefik.http.routers.cz-api-https.tls=true"
+        - "traefik.http.routers.cz-api-https.tls.certresolver=le"
+        - "traefik.docker.network=traefik-public"
+        - "traefik.constraint-label=traefik-public"
+        - "traefik.http.services.cz-api-https.loadbalancer.server.port=8000"
