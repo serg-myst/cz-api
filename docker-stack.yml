@@ -14,10 +14,10 @@ services:
       replicas: 2
       labels:
         - "traefik.enable=true"
-        - "traefik.http.routers.cz-api.rule=Host(`cz-api.itv34.ru`) && (ClientIP(`192.168.57.0/24`) || ClientIP(`192.168.56.0/24`))"
+        - "traefik.http.routers.cz-api.rule=Host(`cz-api.itv34.ru`) && (ClientIP(`192.168.57.0/24`) || ClientIP(`192.168.56.0/24`) || ClientIP(`192.168.65.0/24`))"
         - "traefik.http.routers.cz-api.entrypoints=http"
         - "traefik.http.routers.cz-api.middlewares=https-redirect"
-        - "traefik.http.routers.cz-api-https.rule=Host(`cz-api.itv34.ru`) && (ClientIP(`192.168.57.0/24`) || ClientIP(`192.168.56.0/24`))"
+        - "traefik.http.routers.cz-api-https.rule=Host(`cz-api.itv34.ru`) && (ClientIP(`192.168.57.0/24`) || ClientIP(`192.168.56.0/24`) || ClientIP(`192.168.65.0/24`))"
         - "traefik.http.routers.cz-api-https.entrypoints=https"
         - "traefik.http.routers.cz-api-https.tls=true"
         - "traefik.http.routers.cz-api-https.tls.certresolver=le"
