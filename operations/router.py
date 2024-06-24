@@ -109,7 +109,7 @@ async def get_kiz_full_info(mark: Params, session: AsyncSession = Depends(get_as
         'Authorization': f'Bearer {token}'
     }
 
-    body = [mark.mark[:-7]]
+    body = [mark.mark[:31]]
 
     response = requests.post(URL_CZ, headers=headers, json=body)
     content = json.loads(response.content)
