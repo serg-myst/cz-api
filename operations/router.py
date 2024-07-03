@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from .models import Token
 from .config import URL_CZ
+import re
 
 router_auth = APIRouter(
     prefix='/cz-auth',
@@ -46,6 +47,15 @@ async def get_token_cz(session: AsyncSession = Depends(get_async_session)):
 
 class Params(BaseModel):
     mark: str
+
+
+def process_string(s):
+    pattern = r'^(01\d{14}21.{6}(?=[^\w]|91|93)|01\d{14}21.{13}(?=[^\w]|91|93))'
+    match = re.search(pattern, s)
+    if match:
+        return match.group(0)
+    else:
+        return None
 
 
 @router_marks.post('/')
@@ -121,7 +131,16 @@ async def get_kiz_full_info(mark: Params, session: AsyncSession = Depends(get_as
         'Authorization': f'Bearer {token}'
     }
 
-    body = [mark.mark[:31]]
+    mark_pattern = process_string(mark.mark)
+
+    if mark_pattern == None:
+        return {
+            'status': 500,
+            'details': 'Марка не удовлетворяет заданному шаблону',
+            'data': ''
+        }
+
+    body = [mark_pattern]
 
     response = requests.post(URL_CZ, headers=headers, json=body)
     content = json.loads(response.content)
