@@ -20,9 +20,21 @@ router_marks = APIRouter(
 )
 
 
-@router_auth.get('/')
-async def get_token(session: AsyncSession = Depends(get_async_session)):
-    query = select(Token)
+@router_auth.get('/cz')
+async def get_token_cz(session: AsyncSession = Depends(get_async_session)):
+    query = select(Token).where(Token.token_type == 'CZ')
+    result = await session.scalars(query)
+
+    return {
+        'status': 200,
+        'details': '',
+        'data': result.all()
+    }
+
+
+@router_auth.get('/suz')
+async def get_token_cz(session: AsyncSession = Depends(get_async_session)):
+    query = select(Token).where(Token.token_type == 'SUZ')
     result = await session.scalars(query)
 
     return {
