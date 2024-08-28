@@ -3,12 +3,13 @@ from pydantic import BaseModel
 import requests
 import json
 from fastapi import Depends
-from .database import get_async_session
+from operations.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from .models import Token
-from .config import URL_CZ
+from operations.models import Token, KizStatus, CisStock
+from operations.config import URL_CZ, URL_BALANCE
 import re
+from operations.token import get_token
 
 router_auth = APIRouter(
     prefix='/cz-auth',
@@ -19,6 +20,81 @@ router_marks = APIRouter(
     prefix='/marks-info',
     tags=['Marks']
 )
+
+router_mark_status = APIRouter(
+    prefix='/mark-status',
+    tags=['Marks']
+)
+
+router_balance = APIRouter(
+    prefix='/cz-balance',
+    tags=['Balance']
+)
+router_stock = APIRouter(
+    prefix='/cis-stock',
+    tags=['Stock']
+)
+
+
+# , offset: int = 0, limit: int = 500
+@router_stock.get('/{status}')
+async def get_stock(status: int, session: AsyncSession = Depends(get_async_session)):
+    status_str = ''
+    if status == 0:
+        status_str = 'EMITTED'
+    elif status == 2:
+        status_str = 'INTRODUCED'
+
+    query = select(CisStock).where(CisStock.status == status_str)  # .offset(offset).limit(limit)
+    result = await session.scalars(query)
+
+    return {
+        'status': 200,
+        'details': '',
+        'data': result.all()
+    }
+
+
+@router_balance.get('/')
+async def get_balance():
+    token = await get_token()
+    if token:
+
+        headers = {
+            'Authorization': f'Bearer {token}',
+            'accept': 'application/json'
+        }
+
+        response = requests.get(URL_BALANCE, headers=headers)
+
+        if response.status_code != 200:
+
+            return {
+                'status': response.status_code,
+                'details': response.text,
+                'data': ''
+            }
+
+        else:
+            data = json.loads(response.content)
+
+            return {
+                'status': response.status_code,
+                'details': '',
+                'data': data
+            }
+
+
+@router_mark_status.get('/')
+async def get_mark_status(session: AsyncSession = Depends(get_async_session)):
+    query = select(KizStatus)
+    result = await session.scalars(query)
+
+    return {
+        'status': 200,
+        'details': '',
+        'data': result.all()
+    }
 
 
 @router_auth.get('/cz')
@@ -34,7 +110,7 @@ async def get_token_cz(session: AsyncSession = Depends(get_async_session)):
 
 
 @router_auth.get('/suz')
-async def get_token_cz(session: AsyncSession = Depends(get_async_session)):
+async def get_token_suz(session: AsyncSession = Depends(get_async_session)):
     query = select(Token).where(Token.token_type == 'SUZ')
     result = await session.scalars(query)
 
@@ -60,7 +136,7 @@ def process_string(s):
 
 @router_marks.post('/')
 async def get_kiz_full_info(mark: Params, session: AsyncSession = Depends(get_async_session)):
-    query = select(Token)
+    query = select(Token).where(Token.token_type == 'CZ')
     result = await session.scalars(query)
     res = result.first()
     token = res.jwt_token
