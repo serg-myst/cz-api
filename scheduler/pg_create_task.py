@@ -12,9 +12,9 @@ def create_task():
     for base in BASE_LIST.split(','):
         print(base)
 
-    adrdress = ''
+    address = ''
 
-    result = requests.post(address, auth=HTTPBasicAuth('Администратор'.encode('utf-8'), '20062006Sv!_'),
+    result = requests.post(address, auth=HTTPBasicAuth('111111'.encode('utf-8'), '11111!_'),
                            headers={'Authorization': 'Basic'})
 
     content = result.content.decode('utf-8')
