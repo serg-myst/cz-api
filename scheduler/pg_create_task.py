@@ -12,7 +12,7 @@ def create_task():
     for base in BASE_LIST.split(','):
         print(base)
 
-    address = 'http://ks-1c.itv34.ru/VivoMarket/ru_RU/hs/Socialfood34/AllSkladsKindergarten'
+    adrdress = ''
 
     result = requests.post(address, auth=HTTPBasicAuth('Администратор'.encode('utf-8'), '20062006Sv!_'),
                            headers={'Authorization': 'Basic'})
