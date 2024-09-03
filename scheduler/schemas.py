@@ -40,9 +40,16 @@ class ReportQueryResponse(BaseModel):
             case "FAILED":
                 return 5
 
+
 class ReportQueryIdToDownload(BaseModel):
     file_id: str = Field(alias='id')
     report_id: str = Field(alias='taskId')
     available_to_download: str = Field(alias='available')
     download_status: str = Field(alias='downloadStatus')
     status_date: datetime = datetime.now()
+
+
+class PG1C(BaseModel):
+    organisation: str
+    pg: str
+    mark_date: str

@@ -205,7 +205,8 @@ async def get_file():
             try:
                 query = select(ReportQueryDB).where(ReportQueryDB.status_id == 2,
                                                     ReportQueryDB.file_id != None,
-                                                    ReportQueryDB.available_to_download == 'AVAILABLE')
+                                                    ReportQueryDB.available_to_download == 'AVAILABLE',
+                                                    ReportQueryDB.file_data == None)
                 result = await session.scalars(query)
                 res = result.all()
             except SQLAlchemyError as e:

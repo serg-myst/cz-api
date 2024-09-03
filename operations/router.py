@@ -7,9 +7,10 @@ from operations.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from operations.models import Token, KizStatus, CisStock
-from operations.config import URL_CZ, URL_BALANCE
+from operations.config import URL_CZ, URL_BALANCE, BITRIX_HOOK
 import re
 from operations.token import get_token
+from operations.schemas import Task
 
 router_auth = APIRouter(
     prefix='/cz-auth',
@@ -34,6 +35,32 @@ router_stock = APIRouter(
     prefix='/cis-stock',
     tags=['Stock']
 )
+
+router_bitrix_task = APIRouter(
+    prefix='/create-task',
+    tags=['BITRIX']
+)
+
+
+@router_bitrix_task.post('')
+def create_task(task: Task):
+    method = 'tasks.task.add'
+    body = {'fields': task.dict()}
+    result = requests.post(f'{BITRIX_HOOK}/{method}', json=body)
+
+    if result.status_code == 200:
+        response = result.json()
+        return {
+            'status': 200,
+            'details': '',
+            'data': {'task_id': response['result']['task']['id']}
+        }
+
+    return {
+        'status': result.status_code,
+        'details': result.text,
+        'data': ''
+    }
 
 
 # , offset: int = 0, limit: int = 500

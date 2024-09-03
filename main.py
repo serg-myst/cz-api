@@ -1,7 +1,11 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from operations.router import router_marks, router_auth, router_mark_status, router_balance, router_stock
+from operations.router import router_marks, router_auth, router_mark_status, router_balance, router_stock, \
+    router_bitrix_task
 from scheduler.reports import get_kiz_report, get_report_status, get_report_file_id, get_file, save_data
 from logger import cleanup_logs, logs_path
 from operations.config import QUERY_EMITTED_CRON_HOUR, QUERY_EMITTED_CRON_MINUTE, QUERY_INTRODUCED_CRON_HOUR, \
@@ -20,6 +24,14 @@ scheduler.add_job(get_file, 'cron', minute=GET_FILE_INTERVAL)
 scheduler.add_job(save_data, 'cron', minute=SAVE_DATA_INTERVAL)
 scheduler.add_job(cleanup_logs, 'interval', [logs_path, ], minutes=37400)
 scheduler.start()
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content=jsonable_encoder({"status": 500, "details": exc.errors(), "data": exc.body}),
+    )
 
 
 @app.on_event("shutdown")
@@ -54,3 +66,4 @@ app.include_router(router_auth)
 app.include_router(router_mark_status)
 app.include_router(router_balance)
 app.include_router(router_stock)
+app.include_router(router_bitrix_task)
