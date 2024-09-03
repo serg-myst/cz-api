@@ -26,17 +26,17 @@ def create_task():
 
     response = [
         {
-            'organisation': 'ООО Виво-Маркет',
+            'organisation': 'ООО ',
             'pg': 'Молочная продукция',
             'mark_date': '01.01.2024'
         },
         {
-            'organisation': 'ООО Виво-Маркет',
+            'organisation': 'ООО ',
             'pg': 'Обувь',
             'mark_date': '01.01.2024'
         },
         {
-            'organisation': 'ООО Виво-Маркет',
+            'organisation': 'ООО ',
             'pg': 'Еще что-то',
             'mark_date': '01.01.2024'
         }
