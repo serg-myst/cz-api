@@ -42,7 +42,7 @@ router_bitrix_task = APIRouter(
 )
 
 
-@router_bitrix_task.post('')
+@router_bitrix_task.post('/')
 def create_task(task: Task):
     method = 'tasks.task.add'
     body = {'fields': task.dict()}
